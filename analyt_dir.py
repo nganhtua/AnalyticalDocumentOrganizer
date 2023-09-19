@@ -74,7 +74,7 @@ class AnalytDir:
 			if a[0] > self.max_order:
 				self.max_order = a[0]
 	
-	def add_file(self, filepath, spec_name, doc_type, overwrite=False):
+	def add_file(self, filepath, spec_name, doc_type, del_src=False, overwrite=False):
 		"""Add a file to main or data folder
 		Rename file to defined format
 		If doc_type = 'doc', the file considered as a document file, subprefix = 'a', file named as 'Hồ sơ'
@@ -92,20 +92,55 @@ class AnalytDir:
 
 		if doc_type == 'doc':	# Subprefix = 'a'
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = f'{spec_order:02}' + 'a' + '. ' + spec_name + '. Hồ sơ' + os.path.splitext(filepath)[1]
+			_new_file = '. '.join([f'{spec_order:02}', spec_name, 'a', 'Hồ sơ' + os.path.splitext(filepath)[1]])
 		elif doc_type == 'ss':	# # Subprefix = 'b'
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = f'{spec_order:02}' + 'b' + '. ' + spec_name + '. Bảng tính' + os.path.splitext(filepath)[1]
+			_new_file = '. '.join([f'{spec_order:02}', spec_name, 'b', 'Bảng tính' + os.path.splitext(filepath)[1]])
 		else:
 			os.makedirs(self.path + 'Data\\', exist_ok=True)
-			_current_max_subchar = max('b', self.max_subchar[self.spec_orders[spec_name]])
+			try:
+				_current_max_subchar = max('b', self.max_subchar[self.spec_orders[spec_name]])
+			except KeyError:
+				_current_max_subchar = 'b'
 			_subchar = bytes([bytes(_current_max_subchar, 'utf-8')[0] + 1]).decode('utf-8')
-			_new_file = 'Data\\' + f'{spec_order:02}' + _subchar + '. ' + spec_name + '. ' + os.path.split(filepath)[1]
+			_new_file = 'Data\\' + '. '.join([f'{spec_order:02}', spec_name, _subchar, os.path.split(filepath)[1]])
 		
 		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
 			or (overwrite == True):
 			shutil.copy2(filepath, self.path + _new_file)
 			self.analyze_folder()
-			return 0
-		else:
+		
+		if del_src == True:
+			try:
+				os.remove(filepath)
+			except Exception as e:
+				logger.error('Failed to remove file: ' + str(e))
+		
+	def add_general_doc(self, filepath, doc_type, del_src=False, overwrite=False):
+		"""Add a summary file to main folder
+		Rename file to defined format
+		If doc_type = 'ar', the file considered as an analytical result, file named as '_<analytical_number> <product_name> Phiếu phân tích'
+		If doc_type = 'cw', the file considered as a control worksheet, file named as '_<analytical_number> <product_name> Kiểm soát mẫu phân tích'
+		"""
+		print(filepath)
+		if not os.path.isfile(filepath):
 			return 1
+		
+		if doc_type == 'ar':
+			os.makedirs(self.path, exist_ok=True)
+			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + 'Phiếu phân tích'
+		elif doc_type == 'cw':	# # Subprefix = 'b'
+			os.makedirs(self.path, exist_ok=True)
+			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + 'Kiểm soát mẫu phân tích'
+	
+		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
+			or (overwrite == True):
+			shutil.copy2(filepath, self.path + _new_file)
+			self.analyze_folder()
+	
+		if del_src == True:
+			try:
+				os.remove(filepath)
+			except Exception as e:
+				logger.error('Failed to remove file: ' + str(e))
+	
