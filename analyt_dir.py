@@ -1,19 +1,19 @@
 import os, shutil
 
 def analyze_filename(filename):
-	# In main folder, filename "04. Định lượng. a. Hồ sơ.doc" should be 
-	# processed as (4, 'Định lượng', 'a', 'Hồ sơ.doc')
+	# In main folder, filename "04. Định lượng. 01. Hồ sơ.doc" should be 
+	# processed as (4, 'Định lượng', 1, 'Hồ sơ.doc')
 	# Number 4 refers to "Định lượng"
-	# Letter "a" refers to "Hồ sơ"
-	# In ./Data folder, filename "04. Định lượng. e. Thử 1.pdf" should be 
-	# processed as (4, 'Định lượng', 'e', 'Thử 1.pdf')
+	# Number 1 refers to "Hồ sơ"
+	# In ./Data folder, filename "04. Định lượng. 05. Thử 1.pdf" should be 
+	# processed as (4, 'Định lượng', 5, 'Thử 1.pdf')
 	# If filename can't be processed as above, the file considered as 
 	# not the part of document.
 	
 	_split = filename.split(sep='. ', maxsplit=4)
 	try:
 		_order = int(_split[0])
-		_sub_order = _split[2]
+		_sub_order = int(_split[2])
 		return (_order, _split[1], _sub_order, _split[3])
 	except:
 		return None
@@ -63,10 +63,10 @@ class AnalytDir:
 		self.valid_analyzed = self.valid_main_analyzed + self.valid_extra_analyzed
 		for a in self.valid_analyzed:
 			if a[0] in self.max_subchar.keys():
-				if int(a[2]) > self.max_subchar[a[0]]:
-					self.max_subchar[a[0]] = int(a[2])
+				if a[2] > self.max_subchar[a[0]]:
+					self.max_subchar[a[0]] = a[2]
 			else:
-				self.max_subchar[a[0]] = int(a[2])
+				self.max_subchar[a[0]] = a[2]
 			
 			if a[0] not in self.spec_orders.values():
 				self.spec_orders[a[1]] = a[0]
@@ -128,22 +128,26 @@ class AnalytDir:
 		print(filepath)
 		if not os.path.isfile(filepath):
 			return 1
-		
+				
 		if doc_type == 'ar':
 			os.makedirs(self.path, exist_ok=True)
 			_new_file = '_'.join(['', self.path.split('\\')[-2], self.path.split('\\')[-3], 'Phiếu phân tích' + os.path.splitext(filepath)[-1]])
 		elif doc_type == 'cw':
 			os.makedirs(self.path, exist_ok=True)
 			_new_file = '_'.join(['', self.path.split('\\')[-2], self.path.split('\\')[-3], 'Kiểm soát mẫu phân tích' + os.path.splitext(filepath)[-1]])
-	
+
+		del_command = False
+		if del_src == True:
+			if overwrite == True or not os.path.exists(self.path + _new_file):
+				del_command = True
+		
 		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
 			or (overwrite == True):
 			shutil.copy2(filepath, self.path + _new_file)
 			self.analyze_folder()
 	
-		if del_src == True:
-			if overwrite == True or not os.path.exists(self.path + _new_file):
-				try:
-					os.remove(filepath)
-				except Exception as e:
-					logger.error('Failed to remove file: ' + str(e))
+		if del_command == True:
+			try:
+				os.remove(filepath)
+			except Exception as e:
+				logger.error('Failed to remove file: ' + str(e))

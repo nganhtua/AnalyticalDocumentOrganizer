@@ -50,63 +50,65 @@ cbbx_product_type.current(0)
 cbbx_product_type.grid(sticky="w", row=0, column=1)
 
 tk.Label(frm_top, text="Tên sản phẩm: ").grid(sticky="w", row=1, column=0)
-cbbx_product_name = ttk.Combobox(frm_top, width=30, values = ["Metallica", "Megadeth", "Zoo"])
+cbbx_product_name = ttk.Combobox(frm_top, width=30)
 cbbx_product_name.grid(sticky="w", row=1, column=1)
 
 tk.Label(frm_top, text="Số kiểm nghiệm: ").grid(sticky="w", row=2, column=0)
 cbbx_analytic_no = ttk.Combobox(frm_top, width=30, values = [""])
 cbbx_analytic_no.grid(sticky="w", row=2, column=1)
 
-tk.Label(frm_top, text="File phiếu phân tích: ").grid(sticky="w", row=3, column=0)
-
-var_summary_path = tk.StringVar()
-ent_summary_path = tk.Entry(frm_top, textvariable=var_summary_path)
-ent_summary_path.grid(sticky="ew", row=3, column=1)
-
-#btn_browse_summary = ttk.Button(frm_top, text="", width=3)
-#btn_browse_summary.grid(sticky="e", row=3, column=2)
-
-tk.Label(frm_top, text="File phiếu kiểm soát: ").grid(sticky="w", row=4, column=0)
-
-var_control_path = tk.StringVar()
-ent_control_path = tk.Entry(frm_top, textvariable=var_control_path)
-ent_control_path.grid(sticky="ew", row=4, column=1)
-
-#btn_browse_control = ttk.Button(frm_top, text="", width=3)
-#btn_browse_control.grid(sticky="e", row=4, column=2)
-
-tk.Label(frm_top, text="Chỉ tiêu kiểm nghiệm: ").grid(sticky="w", row=5, column=0)
+tk.Label(frm_top, text="Chỉ tiêu kiểm nghiệm: ").grid(sticky="w", row=3, column=0)
 cbbx_spec = ttk.Combobox(frm_top, width=30, values = [""])
-cbbx_spec.grid(sticky="w", row=5, column=1)
+cbbx_spec.grid(sticky="w", row=3, column=1)
 
-tk.Label(frm_top, text="File hồ sơ phân tích: ").grid(sticky="w", row=6, column=0)
+tk.Label(frm_top, text="File hồ sơ phân tích: ").grid(sticky="w", row=4, column=0)
 
 var_doc_path = tk.StringVar()
 ent_doc_path = tk.Entry(frm_top, textvariable=var_doc_path)
-ent_doc_path.grid(sticky="ew", row=6, column=1)
+ent_doc_path.grid(sticky="ew", row=4, column=1)
 
 #btn_browse_doc = ttk.Button(frm_top, text="", width=3)
 #btn_browse_doc.grid(sticky="e", row=6, column=2)
 
-tk.Label(frm_top, text="File bảng tính: ").grid(sticky="w", row=7, column=0)
+tk.Label(frm_top, text="File bảng tính: ").grid(sticky="w", row=5, column=0)
 
 var_sprdsheet_path = tk.StringVar()
 ent_sprdsheet_path = tk.Entry(frm_top, textvariable=var_sprdsheet_path)
-ent_sprdsheet_path.grid(sticky="ew", row=7, column=1)
+ent_sprdsheet_path.grid(sticky="ew", row=5, column=1)
 
 #btn_browse_sprdsheet = ttk.Button(frm_top, text="", width=3)
 #btn_browse_sprdsheet.grid(sticky="e", row=7, column=2)
 
-tk.Label(frm_top, anchor="w", justify="left", text="Dữ liệu \n(SKĐ, cân,...): ").grid(sticky="nw", row=8, column=0)
+tk.Label(frm_top, anchor="w", justify="left", text="Dữ liệu \n(SKĐ, cân,...): ").grid(sticky="nw", row=6, column=0)
 
 lb_extra_path = tk.Listbox(frm_top)
-lb_extra_path.grid(sticky="enws", row=8, column=1)
+lb_extra_path.grid(sticky="enws", row=6, column=1)
 
 #btn_browse_extra_data = ttk.Button(frm_top, text="", width=3)
 #btn_browse_extra_data.grid(sticky="en", row=8, column=2)
 
+tk.Label(frm_top, text="Hồ sơ chung cho 1 số kiểm nghiệm (nếu có):", font=('Segoe UI', 9, 'bold', 'underline')).grid(sticky="w", row=7, column=0, columnspan=3)
+
+tk.Label(frm_top, text="File phiếu phân tích: ").grid(sticky="w", row=8, column=0)
+
+var_summary_path = tk.StringVar()
+ent_summary_path = tk.Entry(frm_top, textvariable=var_summary_path)
+ent_summary_path.grid(sticky="ew", row=8, column=1)
+
+#btn_browse_summary = ttk.Button(frm_top, text="", width=3)
+#btn_browse_summary.grid(sticky="e", row=3, column=2)
+
+tk.Label(frm_top, text="File phiếu kiểm soát: ").grid(sticky="w", row=9, column=0)
+
+var_control_path = tk.StringVar()
+ent_control_path = tk.Entry(frm_top, textvariable=var_control_path)
+ent_control_path.grid(sticky="ew", row=9, column=1)
+
+#btn_browse_control = ttk.Button(frm_top, text="", width=3)
+#btn_browse_control.grid(sticky="e", row=4, column=2)
+
 frm_options = tk.Frame(frm_top)
-frm_options.grid(sticky="ew", row=9, column=1)
+frm_options.grid(sticky="ew", row=10, column=1)
 frm_options.grid_columnconfigure(1, weight=1)
 
 var_del_src = tk.IntVar()
@@ -159,6 +161,7 @@ def on_select_analytic_no(event):
 	product_name = cbbx_product_name.get()
 	analytic_no = event.widget.get().strip()
 	analytic_no_dir = root_dir + "\\" + product_name + "\\" + analytic_no
+	cbbx_spec["values"] = []
 	d = AnalytDir(analytic_no_dir)
 	print('d.path: ' + d.path)
 	if product_name != '':
