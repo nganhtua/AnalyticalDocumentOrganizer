@@ -233,7 +233,7 @@ def save_files(event):
 	for i, listbox_entry in enumerate(lb_extra_path.get(0, tk.END)):
 		d.add_file(listbox_entry, cbbx_spec.get().strip(), 'ex', del_src=var_del_src.get())
 		files_done += 1
-		lb_extra_path.delete(i)
+		lb_extra_path.delete(0)
 		update_progress(files_done, files_count)
 	cbbx_spec.set("")
 

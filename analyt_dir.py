@@ -29,7 +29,7 @@ class AnalytDir:
 		self.valid_extra_analyzed = []
 		self.valid_analyzed = []
 		self.max_order = 0
-		self.max_subchar = {}	# Highest letter of an order, eg {4: 'c']}
+		self.max_subchar = {}	# Highest letter of an order, eg {4: 3]}
 		self.spec_orders = {}	# Order of a spec, eg {'Định lượng': 4}
 		self.analyze_folder()
 	
@@ -63,10 +63,10 @@ class AnalytDir:
 		self.valid_analyzed = self.valid_main_analyzed + self.valid_extra_analyzed
 		for a in self.valid_analyzed:
 			if a[0] in self.max_subchar.keys():
-				if a[2] > self.max_subchar[a[0]]:
-					self.max_subchar[a[0]] = a[2]
+				if int(a[2]) > self.max_subchar[a[0]]:
+					self.max_subchar[a[0]] = int(a[2])
 			else:
-				self.max_subchar[a[0]] = a[2]
+				self.max_subchar[a[0]] = int(a[2])
 			
 			if a[0] not in self.spec_orders.values():
 				self.spec_orders[a[1]] = a[0]
@@ -81,7 +81,6 @@ class AnalytDir:
 		If doc_type = 'ss', the file considered as a spreadsheet, subprefix = 'b', file named as 'Bảng tính'
 		If doc_type = 'ex', the file considered as a extra data, subprefix count on from 'c', file name keeps unchanged
 		"""
-		print(filepath)
 		if not os.path.isfile(filepath):
 			return 1
 			
@@ -89,32 +88,36 @@ class AnalytDir:
 			spec_order = self.spec_orders[spec_name]
 		else:
 			spec_order = self.max_order + 1
-
-		if doc_type == 'doc':	# Subprefix = 'a'
+		
+		# Generate name for new file
+		if doc_type == 'doc':	# Subprefix = '01'
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '. '.join([f'{spec_order:02}', spec_name, 'a', 'Hồ sơ' + os.path.splitext(filepath)[1]])
-		elif doc_type == 'ss':	# # Subprefix = 'b'
+			_new_file = '. '.join([f'{spec_order:02}', spec_name, '01', 'Hồ sơ' + os.path.splitext(filepath)[1]])
+		elif doc_type == 'ss':	# # Subprefix = '02'
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '. '.join([f'{spec_order:02}', spec_name, 'b', 'Bảng tính' + os.path.splitext(filepath)[1]])
+			_new_file = '. '.join([f'{spec_order:02}', spec_name, '02', 'Bảng tính' + os.path.splitext(filepath)[1]])
 		else:
 			os.makedirs(self.path + 'Data\\', exist_ok=True)
 			try:
-				_current_max_subchar = max('b', self.max_subchar[self.spec_orders[spec_name]])
+				_current_max_subchar = max(2, self.max_subchar[self.spec_orders[spec_name]])
 			except KeyError:
-				_current_max_subchar = 'b'
-			_subchar = bytes([bytes(_current_max_subchar, 'utf-8')[0] + 1]).decode('utf-8')
+				_current_max_subchar = 2
+			_subchar = f'{_current_max_subchar+1:02}'
 			_new_file = 'Data\\' + '. '.join([f'{spec_order:02}', spec_name, _subchar, os.path.split(filepath)[1]])
 		
+		# Copy source file to destination
 		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
 			or (overwrite == True):
 			shutil.copy2(filepath, self.path + _new_file)
 			self.analyze_folder()
 		
+		#Remove source file
 		if del_src == True:
 			try:
 				os.remove(filepath)
 			except Exception as e:
 				logger.error('Failed to remove file: ' + str(e))
+		print('Copied ' + filepath + ' to ' + _new_file + ' successfully.')
 		
 	def add_general_doc(self, filepath, doc_type, del_src=False, overwrite=False):
 		"""Add a summary file to main folder
@@ -128,10 +131,10 @@ class AnalytDir:
 		
 		if doc_type == 'ar':
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + ' Phiếu phân tích' + os.path.splitext(filepath)[-1]
-		elif doc_type == 'cw':	# # Subprefix = 'b'
+			_new_file = '_'.join(['', self.path.split('\\')[-2], self.path.split('\\')[-3], 'Phiếu phân tích' + os.path.splitext(filepath)[-1]])
+		elif doc_type == 'cw':
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + ' Kiểm soát mẫu phân tích.' + os.path.splitext(filepath)[-1]
+			_new_file = '_'.join(['', self.path.split('\\')[-2], self.path.split('\\')[-3], 'Kiểm soát mẫu phân tích' + os.path.splitext(filepath)[-1]])
 	
 		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
 			or (overwrite == True):
