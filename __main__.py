@@ -57,7 +57,7 @@ tk.Label(frm_top, text="Số kiểm nghiệm: ").grid(sticky="w", row=2, column=
 cbbx_analytic_no = ttk.Combobox(frm_top, width=30, values = [""])
 cbbx_analytic_no.grid(sticky="w", row=2, column=1)
 
-tk.Label(frm_top, text="File phiếu kiểm nghiệm: ").grid(sticky="w", row=3, column=0)
+tk.Label(frm_top, text="File phiếu phân tích: ").grid(sticky="w", row=3, column=0)
 
 var_summary_path = tk.StringVar()
 ent_summary_path = tk.Entry(frm_top, textvariable=var_summary_path)
@@ -79,7 +79,7 @@ tk.Label(frm_top, text="Chỉ tiêu kiểm nghiệm: ").grid(sticky="w", row=5, 
 cbbx_spec = ttk.Combobox(frm_top, width=30, values = [""])
 cbbx_spec.grid(sticky="w", row=5, column=1)
 
-tk.Label(frm_top, text="File hồ sơ kiểm nghiệm: ").grid(sticky="w", row=6, column=0)
+tk.Label(frm_top, text="File hồ sơ phân tích: ").grid(sticky="w", row=6, column=0)
 
 var_doc_path = tk.StringVar()
 ent_doc_path = tk.Entry(frm_top, textvariable=var_doc_path)
@@ -133,8 +133,11 @@ btn_save.grid(row=0, column=0, padx=10)
 btn_clear = ttk.Button(frm_bottom, text="Nhập lại")
 btn_clear.grid(row=0, column=1, padx=10)
 
+btn_help = ttk.Button(frm_bottom, text="Hướng dẫn")
+btn_help.grid(row=0, column=2, padx=10)
+
 btn_exit = ttk.Button(frm_bottom, text="Thoát")
-btn_exit.grid(row=0, column=2, padx=10)
+btn_exit.grid(row=0, column=3, padx=10)
 
 # UI FUNCTIONS
 def list_subdir(path):
@@ -145,7 +148,8 @@ def on_select_product_name(event):
 	w = event.widget
 	value = w.get().strip()
 	cbbx_product_name.set(value)
-	cbbx_analytic_no["values"] = list_subdir(root_dir + "\\" + value)
+	if value != '':
+		cbbx_analytic_no["values"] = list_subdir(root_dir + "\\" + value)
 	cbbx_analytic_no.set("")
 	cbbx_spec.set("")
 	
@@ -157,7 +161,8 @@ def on_select_analytic_no(event):
 	analytic_no_dir = root_dir + "\\" + product_name + "\\" + analytic_no
 	d = AnalytDir(analytic_no_dir)
 	print('d.path: ' + d.path)
-	cbbx_spec["values"] = list(d.spec_orders.keys())
+	if product_name != '':
+		cbbx_spec["values"] = list(d.spec_orders.keys())
 	cbbx_spec.set("")
 
 def drop_files(event):
@@ -182,10 +187,29 @@ def save_files(event):
 	# This function called when the users click Lưu file button
 	global cbbx_product_name, cbbx_analytic_no, cbbx_spec, \
 		var_doc_path, var_sprdsheet_path, frm_extra_data, d
+	summary_fpath = var_summary_path.get()
+	control_fpath = var_control_path.get()
+	doc_fpath = var_doc_path.get()
+	sprdsheet_fpath = var_sprdsheet_path.get()
 	product_name = cbbx_product_name.get()
 	analytic_no = cbbx_analytic_no.get()
 	spec_name = cbbx_spec.get()
 	analytic_no_dir = root_dir + "\\" + product_name + "\\" + analytic_no
+	d = AnalytDir(analytic_no_dir)
+	files_done = 0
+	files_count = (summary_fpath != "") + (control_fpath != "") + (doc_fpath != "") + \
+					(sprdsheet_fpath != "") + lb_extra_path.index(tk.END)
+	update_progress(files_done, files_count)
+	if summary_fpath != "":
+		d.add_general_doc(summary_fpath, "ar", del_src=var_del_src.get())
+		files_done += 1
+		var_summary_path.set("")
+		update_progress(files_done, files_count)
+	if control_fpath != "":
+		d.add_general_doc(control_fpath, "cw", del_src=var_del_src.get())
+		files_done += 1
+		var_control_path.set("")
+		update_progress(files_done, files_count)
 	if product_name == '':
 		print('Error: Blank product name.')
 		return None
@@ -195,27 +219,23 @@ def save_files(event):
 	if spec_name == '':
 		print('Error: Blank spec name.')
 		return None
-	doc_fpath = var_doc_path.get()
-	sprdsheet_fpath = var_sprdsheet_path.get()
-	d = AnalytDir(analytic_no_dir)
-	files_done = 0
-	files_count = (doc_fpath != "") + (sprdsheet_fpath != "") + lb_extra_path.index(tk.END)
-	update_progress(files_done, files_count)
+	
 	if doc_fpath != "":
 		d.add_file(doc_fpath, cbbx_spec.get().strip(), 'doc', del_src=var_del_src.get())
 		files_done += 1
+		var_doc_path.set("")
 		update_progress(files_done, files_count)
 	if sprdsheet_fpath != "":
 		d.add_file(sprdsheet_fpath, cbbx_spec.get().strip(), 'ss', del_src=var_del_src.get())
 		files_done += 1
+		var_sprdsheet_path.set("")
 		update_progress(files_done, files_count)
 	for i, listbox_entry in enumerate(lb_extra_path.get(0, tk.END)):
 		d.add_file(listbox_entry, cbbx_spec.get().strip(), 'ex', del_src=var_del_src.get())
 		files_done += 1
+		lb_extra_path.delete(i)
 		update_progress(files_done, files_count)
-	var_doc_path.set("")
-	var_sprdsheet_path.set("")
-	lb_extra_path.delete(0, 'end')
+	cbbx_spec.set("")
 
 def clear_form(event):
 	# This function called when the users click Nhập lại button
@@ -235,6 +255,12 @@ cbbx_product_name.bind("<<ComboboxSelected>>", on_select_product_name)
 cbbx_product_name.bind("<FocusOut>", on_select_product_name)
 cbbx_analytic_no.bind("<<ComboboxSelected>>", on_select_analytic_no)
 cbbx_analytic_no.bind("<FocusOut>", on_select_analytic_no)
+
+ent_summary_path.register_drop_target("*")
+ent_summary_path.bind("<<Drop>>", drop_files)
+
+ent_control_path.register_drop_target("*")
+ent_control_path.bind("<<Drop>>", drop_files)
 
 ent_doc_path.register_drop_target("*")
 ent_doc_path.bind("<<Drop>>", drop_files)

@@ -128,10 +128,10 @@ class AnalytDir:
 		
 		if doc_type == 'ar':
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + 'Phiếu phân tích'
+			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + ' Phiếu phân tích' + os.path.splitext(filepath)[-1]
 		elif doc_type == 'cw':	# # Subprefix = 'b'
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + 'Kiểm soát mẫu phân tích'
+			_new_file = '_' + self.path.split('\\')[-2] + ' ' + self.path.split('\\')[-3] + ' Kiểm soát mẫu phân tích.' + os.path.splitext(filepath)[-1]
 	
 		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
 			or (overwrite == True):
@@ -139,8 +139,8 @@ class AnalytDir:
 			self.analyze_folder()
 	
 		if del_src == True:
-			try:
-				os.remove(filepath)
-			except Exception as e:
-				logger.error('Failed to remove file: ' + str(e))
-	
+			if overwrite == True or not os.path.exists(self.path + _new_file):
+				try:
+					os.remove(filepath)
+				except Exception as e:
+					logger.error('Failed to remove file: ' + str(e))
