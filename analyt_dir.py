@@ -95,7 +95,7 @@ class AnalytDir:
 			_new_file = '. '.join([f'{spec_order:02}', spec_name, '01', 'Hồ sơ' + os.path.splitext(filepath)[1]])
 		elif doc_type == 'ss':	# # Subprefix = '02'
 			os.makedirs(self.path, exist_ok=True)
-			_new_file = '. '.join([f'{spec_order:02}', spec_name, '02', 'Bảng tính' + os.path.splitext(filepath)[1]])
+			_new_file = '. '.join([f'{spec_order:02}', spec_name, '02', 'Bảng kết quả' + os.path.splitext(filepath)[1]])
 		else:
 			os.makedirs(self.path + 'Data\\', exist_ok=True)
 			try:
@@ -112,7 +112,7 @@ class AnalytDir:
 			self.analyze_folder()
 		
 		#Remove source file
-		if del_src == True:
+		if del_src == True and filepath != self.path.replace('\\', '/') + _new_file:
 			try:
 				os.remove(filepath)
 			except Exception as e:
@@ -138,8 +138,9 @@ class AnalytDir:
 
 		del_command = False
 		if del_src == True:
-			if overwrite == True or not os.path.exists(self.path + _new_file):
-				del_command = True
+			if filepath != self.path.replace('\\', '/') + _new_file:
+				if overwrite == True or not os.path.exists(self.path + _new_file):
+					del_command = True
 		
 		if (overwrite == False and not os.path.exists(self.path + _new_file)) \
 			or (overwrite == True):
@@ -151,3 +152,4 @@ class AnalytDir:
 				os.remove(filepath)
 			except Exception as e:
 				logger.error('Failed to remove file: ' + str(e))
+		print('Copied ' + filepath + ' to ' + _new_file + ' successfully.')
